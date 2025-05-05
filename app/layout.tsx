@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Jost } from "next/font/google";
 import "./globals.css";
+import { GlobalStateProvider } from "@/context";
 
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 // Import Jost font
 const jost = Jost({
   subsets: ["latin"],
@@ -23,7 +26,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jost.variable} antialiased`}>
-        {children}
+        <GlobalStateProvider>
+          {children}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            pauseOnHover
+            draggable
+          />
+        </GlobalStateProvider>
       </body>
     </html>
   );
