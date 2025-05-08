@@ -58,7 +58,7 @@ export default function SignUpPage() {
         try {
             const { data } = await axios.post(`${API_BASE}/auth/signup`, form)
             setAuth(data)
-            toast.success('Account created successfully!')
+            toast.success(`Hi ${data.user.username}, Your Account created successfully!`)
             router.push('/inbox')
         } catch (err: any) {
             const msg = err.response?.data?.message || err.message

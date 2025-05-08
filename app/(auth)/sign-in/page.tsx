@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useGlobalState } from '@/context'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!
 
 export default function Signin() {
-
     const isValidEmail = (email: string) => /^\S+@\S+\.\S+$/.test(email)
 
     const router = useRouter()
@@ -31,8 +31,7 @@ export default function Signin() {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
-    // front-end validation
-    const emailValid = /^\S+@\S+\.\S+$/.test(form.email)
+    const emailValid = isValidEmail(form.email)
     const canSubmit = emailValid && form.password.trim() !== ''
 
     const handleSubmit = async (e: FormEvent) => {
@@ -46,24 +45,17 @@ export default function Signin() {
         }
 
         try {
-            const res = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
-            })
-            if (!res.ok) {
-                const err = await res.json().catch(() => null)
-                throw new Error(err?.message || res.statusText)
-            }
-            const data = await res.json()
+            const response = await axios.post(`${API_BASE}/auth/login`, form)
+            const data = response.data
             setAuth(data)
-            toast.success('Logged in successfully!')
+            // assuming `data.user.name` contains the logged-in user's name
+            toast.success(`Welcome back, ${data.user.username}!`)
             router.push('/inbox')
         } catch (err: any) {
             const msg =
-                err.name === 'TypeError'
+                !err.response
                     ? 'Network error – check your connection.'
-                    : err.message
+                    : err.response.data?.message || err.message
             toast.error(msg)
         }
     }

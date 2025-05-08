@@ -1,4 +1,3 @@
-// context/index.tsx
 'use client'
 
 import React, {
@@ -12,11 +11,13 @@ import axios from 'axios'
 import { useRouter, usePathname } from 'next/navigation'
 import verifyToken from './functions/verifyToken'
 
-// 1) Your Auth shape
+// 1) Your Auth shape now matches the login response
 export interface Auth {
-  username: string
-  email: string
-  password: string
+  user: {
+    id: string
+    username: string
+    email: string
+  }
   token: string
 }
 
@@ -31,9 +32,11 @@ interface GlobalContextType {
 
 // 3) Default auth state
 const initialAuth: Auth = {
-  username: '',
-  email: '',
-  password: '',
+  user: {
+    id: '',
+    username: '',
+    email: '',
+  },
   token: '',
 }
 
@@ -85,7 +88,7 @@ export function GlobalStateProvider({ children }: { children: ReactNode }) {
     if (!initialized) return
 
     const publicPaths = ['/sign-up', '/sign-in']
-    if (publicPaths.some(p => pathname.startsWith(p))) {
+    if (publicPaths.some((p) => pathname.startsWith(p))) {
       setAuthChecking(false)
       return
     }
