@@ -1,10 +1,8 @@
 'use client'
-
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGlobalState } from '@/context'
 import ChatWindow from './_components/chat-window'
-import Chats from './_components/chats'
 import Sidebar from './_components/sidebar'
 import PageLoader from '../_components/page-loader'
 
@@ -31,7 +29,6 @@ export default function Inbox() {
     return (
         <div className="h-screen flex">
             <Sidebar />
-            <Chats />
             <ChatWindow />
         </div>
     )

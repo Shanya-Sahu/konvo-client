@@ -16,6 +16,10 @@ type Message = {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!
 const SOCKET_BASE = API_BASE.replace(/\/api\/v1\/?$/, '')
 
+function formatDate(date: Date) {
+    return date.toLocaleDateString('en-GB').replace(/\//g, '-') // like this format 15-05-2025
+}
+
 export default function ChatWindow() {
     const { auth } = useGlobalState()
     const currentUser = auth.user.username
@@ -37,16 +41,19 @@ export default function ChatWindow() {
                 }>
             >(`${API_BASE}/group/messages`)
             .then(({ data }) => {
-                const hist: Message[] = data.map((m) => ({
-                    id: m._id,
-                    text: m.content,
-                    sender: m.sender === currentUser ? 'user' : 'other',
-                    username: m.sender,
-                    time: new Date(m.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    }),
-                }))
+                const hist: Message[] = data.map((m) => {
+                    const dateObj = new Date(m.timestamp)
+                    return {
+                        id: m._id,
+                        text: m.content,
+                        sender: m.sender === currentUser ? 'user' : 'other',
+                        username: m.sender,
+                        time: `${formatDate(dateObj)} ${dateObj.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        })}`,
+                    }
+                })
                 setMessages(hist)
             })
             .catch((err) => console.error('❌ History fetch error', err))
@@ -62,15 +69,16 @@ export default function ChatWindow() {
                 // IGNORE your own echo
                 if (m.sender === currentUser) return
 
+                const dateObj = new Date(m.timestamp)
                 const incoming: Message = {
                     id: m._id,
                     text: m.content,
                     sender: 'other',
                     username: m.sender,
-                    time: new Date(m.timestamp).toLocaleTimeString([], {
+                    time: `${formatDate(dateObj)} ${dateObj.toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
-                    }),
+                    })}`,
                 }
                 setMessages((prev) => [...prev, incoming])
             }
@@ -93,10 +101,10 @@ export default function ChatWindow() {
 
         const now = new Date()
         const tempId = `temp-${now.getTime()}`
-        const time = now.toLocaleTimeString([], {
+        const time = `${formatDate(now)} ${now.toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
-        })
+        })}`
 
         // show immediately
         const tempMsg: Message = {
@@ -122,7 +130,7 @@ export default function ChatWindow() {
     }
 
     return (
-        <div className="w-full pl-[50px] flex flex-col bg-white rounded-lg shadow">
+        <div className="w-full pl-[90px] flex flex-col bg-white rounded-lg shadow">
             <div className="w-full py-5 bg-primary">
                 <h1 className="text-white text-center text-2xl">Konvo Group Chat</h1>
             </div>
@@ -136,13 +144,13 @@ export default function ChatWindow() {
                     >
                         <div className="flex flex-col">
                             <span
-                                className={`text-xs font-semibold ${msg.sender === 'user' ? 'text-primary' : 'text-gray-700'
+                                className={`text-xs font-semibold capitalize ${msg.sender === 'user' ? 'text-primary' : 'text-gray-700'
                                     }`}
                             >
                                 {msg.username}
                             </span>
                             <div
-                                className={`mt-1 max-w-xs px-4 py-2 rounded-lg break-words ${msg.sender === 'user'
+                                className={`mt-1 max-w-xl px-4 py-2 rounded-lg break-words ${msg.sender === 'user'
                                     ? 'bg-primary text-white'
                                     : 'bg-gray-100 text-text'
                                     }`}
